@@ -27,9 +27,9 @@ for bond in data["bonds"]:
     # Modified Duration
     mod_dur = mac_dur / (1 + y/freq)
     
-    # Convexity
-    conv = sum(((i+1)/freq)**2 + (i+1)/freq) * cpn/(1+y/freq)**(i+1) for i in range(n))
-    conv += (n/freq)**2 + n/freq * F/(1+y/freq)**n
+    # Convexity - FIXED
+    conv = sum((((i+1)/freq)**2 + (i+1)/freq) * cpn/(1+y/freq)**(i+1) for i in range(n))
+    conv += ((n/freq)**2 + n/freq) * F/(1+y/freq)**n
     conv = conv / (price * (1+y/freq)**2)
     
     # DV01
