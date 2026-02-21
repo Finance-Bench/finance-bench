@@ -38,22 +38,25 @@ if len(exceedances) > 10:
 else:
     shape, scale = 0.1, 0.01
 
-# Parametric VaR using GPD
+# Parametric VaR using GPD - FIXED: corrected operator precedence
 nu = len(exceedances) / n
 if shape != 0:
-    var_99_param = threshold + (scale / shape) * ((n * nu / n * 0.01)**shape - 1)
-    var_999_param = threshold + (scale / shape) * ((n * nu / n * 0.001)**shape - 1)
+    var_99_param = threshold + (scale / shape) * ((nu / 0.01)**shape - 1)
+    var_999_param = threshold + (scale / shape) * ((nu / 0.001)**shape - 1)
 else:
     var_99_param = var_99_hist
     var_999_param = var_999_hist
 
-# CVaR
-cvar_99_param = var_99_param * 1.15  # Simplified
+# CVaR - FIXED: proper GPD expected shortfall calculation
+if shape < 1 and shape != 0:
+    cvar_99_param = var_99_param + scale / (1 - shape)
+else:
+    cvar_99_param = var_99_param * 1.15  # Fallback
 
 results = {
-    "var_99_parametric": round(abs(var_99_param), 4),
-    "var_999_parametric": round(abs(var_999_param), 4),
-    "cvar_99_parametric": round(abs(cvar_99_param), 4),
+    "var_99_parametric": round(var_99_param, 4),
+    "var_999_parametric": round(var_999_param, 4),
+    "cvar_99_parametric": round(cvar_99_param, 4),
     "var_99_historical": round(var_99_hist, 4),
     "threshold": round(threshold, 4),
     "gpd_shape": round(shape, 4),
