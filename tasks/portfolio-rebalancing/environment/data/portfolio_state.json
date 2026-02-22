@@ -1,0 +1,16 @@
+{
+  "target_weights": {
+    "US_Equity": 0.4,
+    "Int_Equity": 0.2,
+    "US_Bond": 0.25,
+    "Int_Bond": 0.1,
+    "Cash": 0.05
+  },
+  "current_holdings": {
+    "US_Equity": 45000,
+    "Int_Equity": 18000,
+    "US_Bond": 22000,
+    "Int_Bond": 12000,
+    "Cash": 3000
+  }
+}

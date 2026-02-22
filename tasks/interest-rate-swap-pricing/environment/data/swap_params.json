@@ -1,0 +1,8 @@
+{
+  "notional": 10000000,
+  "fixed_rate": 0.045,
+  "tenor_years": 5,
+  "payment_freq": 2,
+  "current_market_rate": 0.042,
+  "discount_rate": 0.042
+}

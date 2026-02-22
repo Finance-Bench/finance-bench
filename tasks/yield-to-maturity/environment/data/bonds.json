@@ -1,0 +1,37 @@
+{
+  "B1": {
+    "price": 980.0,
+    "face": 1000.0,
+    "coupon_rate": 0.05,
+    "maturity_years": 5,
+    "freq": 2
+  },
+  "B2": {
+    "price": 1050.0,
+    "face": 1000.0,
+    "coupon_rate": 0.06,
+    "maturity_years": 3,
+    "freq": 2
+  },
+  "B3": {
+    "price": 850.0,
+    "face": 1000.0,
+    "coupon_rate": 0.04,
+    "maturity_years": 10,
+    "freq": 2
+  },
+  "B4": {
+    "price": 1000.0,
+    "face": 1000.0,
+    "coupon_rate": 0.055,
+    "maturity_years": 7,
+    "freq": 2
+  },
+  "B5": {
+    "price": 920.0,
+    "face": 1000.0,
+    "coupon_rate": 0.03,
+    "maturity_years": 2,
+    "freq": 4
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "pairs": {
+    "EURUSD": {
+      "spot": 1.085,
+      "r_domestic": 0.053,
+      "r_foreign": 0.035
+    },
+    "USDJPY": {
+      "spot": 149.5,
+      "r_domestic": 0.001,
+      "r_foreign": 0.053
+    },
+    "GBPUSD": {
+      "spot": 1.265,
+      "r_domestic": 0.053,
+      "r_foreign": 0.052
+    },
+    "AUDUSD": {
+      "spot": 0.652,
+      "r_domestic": 0.053,
+      "r_foreign": 0.043
+    }
+  },
+  "tenors_years": [
+    0.25,
+    0.5,
+    1.0,
+    2.0
+  ]
+}
