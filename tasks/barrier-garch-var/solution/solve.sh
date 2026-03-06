@@ -19,7 +19,6 @@ def load_json(path):
 
 def write_json(path, obj):
     """Write JSON, converting Python NaN/Infinity to JSON null."""
-def write_json(path, obj):
     """Write JSON, converting Python NaN/Infinity to JSON null."""
     def sanitise(o):
         if isinstance(o, float) and (math.isnan(o) or math.isinf(o)):
