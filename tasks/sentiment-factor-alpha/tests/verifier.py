@@ -289,7 +289,6 @@ def check_intermediates(
                         error_class = "convention"
                 else:
                     error_class = "computation"
-                    error_class = "computation"
 
             result = {
                 "term": term_name,
