@@ -18,16 +18,20 @@ def load_json(path):
         return json.loads(f.read())
 def write_json(path, obj):
     """Write JSON, converting Python NaN/Infinity to JSON null."""
-def write_json(path, obj):
-    # First pass: walk the object and replace nan/inf with None so
-    # json.dumps produces valid JSON (nan is not valid JSON).
-
     # First pass: walk the object and replace nan/inf with None so
     # json.dumps produces valid JSON (nan is not valid JSON).
     def sanitise(obj):
         if isinstance(obj, float) and (math.isnan(obj) or math.isinf(obj)):
             return None
         if isinstance(obj, dict):
+            return {k: sanitise(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [sanitise(v) for v in obj]
+        return obj
+
+    with open(path, "w") as f:
+        json.dump(sanitise(obj), f, indent=2)
+    print(f"  wrote {path}")
             return {k: sanitise(v) for k, v in obj.items()}
         if isinstance(obj, list):
             return [sanitise(v) for v in obj]
