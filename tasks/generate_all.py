@@ -117,6 +117,16 @@ def solve_kelly(returns_data=None):
         df = pd.read_csv(os.path.join(data_dir, 'returns.csv'))
         returns_data = df[['asset_0', 'asset_1', 'asset_2']].values
 
+    # ── Data cleaning: drop rows with any NaN ──
+    mask = ~np.isnan(returns_data).any(axis=1)
+    returns_data = returns_data[mask]
+    num_valid_observations = len(returns_data)
+
+    # ── Estimation window: use only last N valid observations ──
+    estimation_window = params.get('estimation_window_days')
+    if estimation_window is not None and len(returns_data) > estimation_window:
+        returns_data = returns_data[-estimation_window:]
+
     initial_capital = params['initial_capital']
     n_paths = params['n_simulation_paths']
     n_days = params['n_days']
@@ -132,6 +142,8 @@ def solve_kelly(returns_data=None):
     cov_hat = np.cov(returns_data.T, ddof=1)  # unbiased
 
     print(f"\n=== kelly-var-sizing ===")
+    print(f"  num_valid_observations = {num_valid_observations}")
+    print(f"  estimation_window = {estimation_window} -> using {len(returns_data)} rows")
     print(f"  mu_hat = {mu_hat}")
     print(f"  r_f_daily = {rf_daily:.10f}")
     print(f"  mu_excess = {mu_excess}")
@@ -206,7 +218,7 @@ def solve_kelly(returns_data=None):
     # Median terminal wealth (index n_paths // 2 after sorting)
     median_idx = n_paths // 2
 
-    results = {}
+    results = {'num_valid_observations': num_valid_observations}
     for name in ['full', 'var']:
         sorted_tw = np.sort(terminal_wealth[name])
         results[f'median_terminal_wealth_{name}'] = float(sorted_tw[median_idx])
@@ -242,10 +254,6 @@ def solve_kelly(returns_data=None):
         'total_kelly_leverage': total_leverage,
         'portfolio_var_full': float(var_full),
         'var_scale_factor': float(kappa),
-        'theoretical_growth_full': growth['full'],
-        'theoretical_growth_var': growth['var'],
-        'theoretical_growth_half': growth['half'],
-        'theoretical_growth_equal': growth['equal'],
         'mean_terminal_wealth_full': mean_tw_full,
     }
 
@@ -266,6 +274,7 @@ def solve_kelly(returns_data=None):
         {'full': f_star_c, 'var': f_var_c},
         mu_hat, cov_hat, initial_capital, n_paths, n_days, sim_rng2
     )
+    alt_results_rf['num_valid_observations'] = num_valid_observations
 
     # ── Alt path: sharpe_excess ──
     # Same fractions as primary, but Sharpe = (mean - rf_daily) / std * sqrt(252)
@@ -274,10 +283,12 @@ def solve_kelly(returns_data=None):
         {'full': f_star, 'var': f_var},
         mu_hat, cov_hat, initial_capital, n_paths, n_days, sim_rng3, rf_daily
     )
+    alt_results_sharpe['num_valid_observations'] = num_valid_observations
 
     # ── Alt path: drawdown_negative ──
     # Same values as primary but negate drawdown
     alt_results_dd_neg = {
+        'num_valid_observations': num_valid_observations,
         'median_terminal_wealth_full': results['median_terminal_wealth_full'],
         'median_terminal_wealth_var': results['median_terminal_wealth_var'],
         'sharpe_full': results['sharpe_full'],
@@ -527,6 +538,21 @@ def solve_regime(returns_data=None, dates=None, tickers=None):
         dates = df['date'].tolist()
         returns_data = df[tickers].values
 
+    # ── Data cleaning: drop rows with any NaN ──
+    mask = ~np.isnan(returns_data).any(axis=1)
+    returns_data = returns_data[mask]
+    dates = [d for d, m in zip(dates, mask) if m]
+    num_valid_observations = len(returns_data)
+
+    # ── Estimation window: use only last N valid observations ──
+    estimation_window = params.get('estimation_window_days')
+    if estimation_window is not None and len(returns_data) > estimation_window:
+        returns_data = returns_data[-estimation_window:]
+        dates = dates[-estimation_window:]
+
+    print(f"  num_valid_observations = {num_valid_observations}")
+    print(f"  estimation_window = {estimation_window} -> using {len(returns_data)} rows")
+
     rolling_window = params['rolling_window']
     risk_budget = params['risk_budget']
     cvar_confidence = params['cvar_confidence']
@@ -721,6 +747,10 @@ def solve_regime(returns_data=None, dates=None, tickers=None):
                                 rolling_window, cvar_confidence, cvar_window,
                                 sign_positive=True, vol_ddof=0)
 
+    # Inject num_valid_observations into all result maps
+    for m in [primary, neg_signs, first_month, inv_vol_dd0]:
+        m['num_valid_observations'] = num_valid_observations
+
     print(f"\n  Primary results:")
     for k, v in primary.items():
         print(f"    {k} = {v}")
@@ -742,7 +772,7 @@ def solve_regime(returns_data=None, dates=None, tickers=None):
         'win_rate': primary['win_rate'],
     }
 
-    deliverable_keys = ['annualized_return', 'annualized_volatility', 'sharpe_ratio',
+    deliverable_keys = ['num_valid_observations', 'annualized_return', 'annualized_volatility', 'sharpe_ratio',
                         'max_drawdown', 'cvar']
 
     alt_maps = {
